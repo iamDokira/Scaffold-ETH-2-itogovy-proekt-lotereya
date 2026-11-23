@@ -1,23 +1,49 @@
 # dependencies
-node_modules
+node_modules/
+.yarn/cache
+.yarn/install-state.gz
+.pnp.*
+*.tsbuildinfo
 
-# yarn
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+# builds / artifacts
+packages/hardhat/artifacts/
+packages/hardhat/cache/
+packages/hardhat/typechain-types/
+packages/hardhat/generated/
+packages/nextjs/.next/
+packages/nextjs/out/
+dist/
+build/
 
-# eslint
-.eslintcache
+# deployments (генерируются при yarn deploy)
+packages/hardhat/deployments/
 
-# misc
-.DS_Store
+# env
+.env
+.env.local
+.env.*.local
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/
+*.swp
 
-# cli
-dist
+# OS
+.DS_Store
+Thumbs.db
+
+# docs (НЕ коммитим диаграммы и отчёты)
+docs/
+*.pdf
+
+# solc binary (не коммитим)
+solc-*.exe
+
+# logs
+*.log
+yarn-error.log
+npm-debug.log*
+
+# test / coverage
+coverage/
+.coverage

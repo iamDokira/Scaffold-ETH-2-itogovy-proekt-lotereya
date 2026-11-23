@@ -21,6 +21,10 @@ export default defineConfig({
     compilers: [
       {
         version: "0.8.30",
+        // ✅ ЛОКАЛЬНЫЙ КОМПИЛЯТОР (скачан с GitHub, лежит в корне проекта).
+        // Позволяет Hardhat НЕ ходить в сеть за solc 0.8.30.
+        // Путь в Windows-стиле, с двойными обратными слэшами.
+        path: "..\\\\..\\\\solc-0.8.30.exe",
         settings: {
           optimizer: {
             enabled: true,
@@ -140,12 +144,12 @@ export default defineConfig({
     },
     polygonZkEvm: {
       type: "http",
-      url: `https://polygonzkevm-mainnet.g.alchemy.com/v2/${providerApiKey}`,
+      url: `https://polygon-zkevm-mainnet.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey],
     },
     polygonZkEvmCardona: {
       type: "http",
-      url: `https://polygonzkevm-cardona.g.alchemy.com/v2/${providerApiKey}`,
+      url: `https://polygon-zkevm-cardona.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey],
     },
   },
