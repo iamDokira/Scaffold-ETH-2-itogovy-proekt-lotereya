@@ -6,8 +6,8 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    GradesManager: {
-      address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+    Lottery: {
+      address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
       abi: [
         {
           inputs: [],
@@ -20,39 +20,64 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "by",
-              type: "address",
-            },
-            {
-              indexed: true,
-              internalType: "address",
-              name: "student",
+              name: "player",
               type: "address",
             },
             {
               indexed: false,
-              internalType: "uint8",
-              name: "grade",
-              type: "uint8",
+              internalType: "uint256",
+              name: "round",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalPlayers",
+              type: "uint256",
             },
           ],
-          name: "GradeSet",
+          name: "TicketBought",
           type: "event",
         },
         {
+          anonymous: false,
           inputs: [
             {
+              indexed: true,
               internalType: "address",
-              name: "student",
+              name: "winner",
               type: "address",
             },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "prize",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "round",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalPlayers",
+              type: "uint256",
+            },
           ],
-          name: "getGrade",
+          name: "WinnerPicked",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "PRIZE",
           outputs: [
             {
-              internalType: "uint8",
+              internalType: "uint256",
               name: "",
-              type: "uint8",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -60,43 +85,166 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "getMyGrade",
+          name: "TICKET_PRICE",
           outputs: [
             {
-              internalType: "uint8",
+              internalType: "uint256",
               name: "",
-              type: "uint8",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "address",
-              name: "student",
-              type: "address",
-            },
-            {
-              internalType: "uint8",
-              name: "grade",
-              type: "uint8",
-            },
-          ],
-          name: "setGrade",
+          inputs: [],
+          name: "buyTicket",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
           inputs: [],
-          name: "teacher",
+          name: "getPlayers",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getPlayersCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getWinner",
           outputs: [
             {
               internalType: "address",
               name: "",
               type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+          ],
+          name: "getWins",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "lastWinner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "pickWinner",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "players",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "round",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "wins",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -104,10 +252,10 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 1,
+      deployedOnBlock: 2,
     },
     YourContract: {
-      address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+      address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
       abi: [
         {
           inputs: [
@@ -248,7 +396,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 2,
+      deployedOnBlock: 1,
     },
   },
 } as const;

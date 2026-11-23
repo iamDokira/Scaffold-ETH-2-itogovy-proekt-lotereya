@@ -9,7 +9,7 @@ node_modules/
 packages/hardhat/artifacts/
 packages/hardhat/cache/
 packages/hardhat/typechain-types/
-packages/hardhat/generated/
+# packages/hardhat/generated/
 packages/nextjs/.next/
 packages/nextjs/out/
 dist/
