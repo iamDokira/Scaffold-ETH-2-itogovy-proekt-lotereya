@@ -6,13 +6,38 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    Lottery: {
-      address: "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512",
+    Lotto: {
+      address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
       abi: [
         {
           inputs: [],
           stateMutability: "nonpayable",
           type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "uint8[6]",
+              name: "numbers",
+              type: "uint8[6]",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "round",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "totalTickets",
+              type: "uint256",
+            },
+          ],
+          name: "NumbersDrawn",
+          type: "event",
         },
         {
           anonymous: false,
@@ -26,17 +51,23 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint256",
-              name: "round",
+              name: "amount",
               type: "uint256",
             },
             {
               indexed: false,
+              internalType: "uint8",
+              name: "matches",
+              type: "uint8",
+            },
+            {
+              indexed: false,
               internalType: "uint256",
-              name: "totalPlayers",
+              name: "round",
               type: "uint256",
             },
           ],
-          name: "TicketBought",
+          name: "PrizePaid",
           type: "event",
         },
         {
@@ -45,14 +76,14 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
-              name: "winner",
+              name: "player",
               type: "address",
             },
             {
               indexed: false,
-              internalType: "uint256",
-              name: "prize",
-              type: "uint256",
+              internalType: "uint8[6]",
+              name: "numbers",
+              type: "uint8[6]",
             },
             {
               indexed: false,
@@ -63,16 +94,16 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "uint256",
-              name: "totalPlayers",
+              name: "price",
               type: "uint256",
             },
           ],
-          name: "WinnerPicked",
+          name: "TicketBought",
           type: "event",
         },
         {
           inputs: [],
-          name: "PRIZE",
+          name: "MAX_NUMBER",
           outputs: [
             {
               internalType: "uint256",
@@ -100,17 +131,24 @@ const deployedContracts = {
           inputs: [],
           name: "buyTicket",
           outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "drawNumbers",
+          outputs: [],
           stateMutability: "nonpayable",
           type: "function",
         },
         {
           inputs: [],
-          name: "getPlayers",
+          name: "getLastDraw",
           outputs: [
             {
-              internalType: "address[]",
+              internalType: "uint8[6]",
               name: "",
-              type: "address[]",
+              type: "uint8[6]",
             },
           ],
           stateMutability: "view",
@@ -118,7 +156,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "getPlayersCount",
+          name: "getMyPrize",
           outputs: [
             {
               internalType: "uint256",
@@ -131,13 +169,97 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "getWinner",
+          name: "getMyTickets",
           outputs: [
             {
-              internalType: "address",
+              components: [
+                {
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  internalType: "uint8[6]",
+                  name: "numbers",
+                  type: "uint8[6]",
+                },
+                {
+                  internalType: "uint256",
+                  name: "round",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "prize",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct Lotto.Ticket[]",
               name: "",
-              type: "address",
+              type: "tuple[]",
             },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getMyTicketsBought",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "index",
+              type: "uint256",
+            },
+          ],
+          name: "getTicket",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "address",
+                  name: "player",
+                  type: "address",
+                },
+                {
+                  internalType: "uint8[6]",
+                  name: "numbers",
+                  type: "uint8[6]",
+                },
+                {
+                  internalType: "uint256",
+                  name: "round",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "prize",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct Lotto.Ticket",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getTicketsCount",
+          outputs: [
             {
               internalType: "uint256",
               name: "",
@@ -167,13 +289,38 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "lastWinner",
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "lastDrawnNumbers",
           outputs: [
+            {
+              internalType: "uint8",
+              name: "",
+              type: "uint8",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
             {
               internalType: "address",
               name: "",
               type: "address",
+            },
+          ],
+          name: "lastPrize",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -194,9 +341,22 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "pickWinner",
+          name: "resetRound",
           outputs: [],
           stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "round",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
           type: "function",
         },
         {
@@ -207,20 +367,36 @@ const deployedContracts = {
               type: "uint256",
             },
           ],
-          name: "players",
+          name: "tickets",
           outputs: [
             {
               internalType: "address",
-              name: "",
+              name: "player",
               type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "round",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "prize",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
           type: "function",
         },
         {
-          inputs: [],
-          name: "round",
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "ticketsBought",
           outputs: [
             {
               internalType: "uint256",
@@ -248,146 +424,6 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
-          type: "function",
-        },
-      ],
-      inheritedFunctions: {},
-      deployedOnBlock: 2,
-    },
-    YourContract: {
-      address: "0x5fbdb2315678afecb367f032d93f642f64180aa3",
-      abi: [
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "_owner",
-              type: "address",
-            },
-          ],
-          stateMutability: "nonpayable",
-          type: "constructor",
-        },
-        {
-          anonymous: false,
-          inputs: [
-            {
-              indexed: true,
-              internalType: "address",
-              name: "greetingSetter",
-              type: "address",
-            },
-            {
-              indexed: false,
-              internalType: "string",
-              name: "newGreeting",
-              type: "string",
-            },
-            {
-              indexed: false,
-              internalType: "bool",
-              name: "premium",
-              type: "bool",
-            },
-            {
-              indexed: false,
-              internalType: "uint256",
-              name: "value",
-              type: "uint256",
-            },
-          ],
-          name: "GreetingChange",
-          type: "event",
-        },
-        {
-          inputs: [],
-          name: "greeting",
-          outputs: [
-            {
-              internalType: "string",
-              name: "",
-              type: "string",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "owner",
-          outputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "premium",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_newGreeting",
-              type: "string",
-            },
-          ],
-          name: "setGreeting",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "totalCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "userGreetingCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "withdraw",
-          outputs: [],
-          stateMutability: "nonpayable",
           type: "function",
         },
         {

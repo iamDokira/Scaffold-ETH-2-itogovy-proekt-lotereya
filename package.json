@@ -57,7 +57,8 @@
     "lint-staged": "^16.4.0"
   },
   "resolutions": {
-    "@coinbase/cdp-sdk": "1.52.0"
+    "@coinbase/cdp-sdk": "1.52.0",
+    "ethers": "6.16.0"
   },
   "engines": {
     "node": ">=22.13.0"
