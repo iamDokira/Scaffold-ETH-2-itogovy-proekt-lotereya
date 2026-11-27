@@ -13,8 +13,8 @@ import { HypeBadges, JackpotCounter, OnlineCounter, WinnersTicker } from "~~/com
 import { LotteryBackground } from "~~/components/LotteryBackground";
 import { BarrelIcon, PeopleIcon, RoundIcon, TicketIcon, TrophyIcon } from "~~/components/LotteryIcons";
 import {
+  useScaffoldEventHistory,
   useScaffoldReadContract,
-  useScaffoldWatchContractEvent,
   useScaffoldWriteContract,
   useTargetNetwork,
 } from "~~/hooks/scaffold-eth";
@@ -34,6 +34,14 @@ type PrizeEvent = {
   amount: bigint;
   matches: number;
   round: bigint;
+  txHash: string;
+};
+
+type DrawEvent = {
+  numbers: readonly number[];
+  round: bigint;
+  totalTickets: bigint;
+  blockNumber: bigint;
   txHash: string;
 };
 
@@ -60,14 +68,27 @@ const Home: NextPage = () => {
     functionName: "getLastDraw",
     watch: true,
   });
+
+  // Читаем выигрыш именно подключённого пользователя.
   const { data: myPrize } = useScaffoldReadContract({
     contractName: "Lotto",
     functionName: "getMyPrize",
+    account: connectedAddress,
+    watch: true,
+    query: {
+      enabled: !!connectedAddress,
+    },
   });
+
+  // Читаем билеты именно подключённого пользователя.
   const { data: myTicketsRaw } = useScaffoldReadContract({
     contractName: "Lotto",
     functionName: "getMyTickets",
+    account: connectedAddress,
     watch: true,
+    query: {
+      enabled: !!connectedAddress,
+    },
   });
 
   const isOwner = useMemo(
@@ -98,7 +119,7 @@ const Home: NextPage = () => {
 
   async function onDraw() {
     try {
-      await drawNumbers({ functionName: "drawNumbers" });
+      await drawNumbers({ functionName: "drawNumbers", gas: 500_000n });
       toast.success("Числа разыграны!", { icon: "🎲" });
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 6000);
@@ -116,21 +137,54 @@ const Home: NextPage = () => {
     }
   }
 
-  const [events, setEvents] = useState<PrizeEvent[]>([]);
-  useScaffoldWatchContractEvent({
+  // Загружаем все исторические события выплат из блокчейна.
+  // watch: true позволяет также получать новые события.
+  const { data: prizeEvents } = useScaffoldEventHistory({
     contractName: "Lotto",
     eventName: "PrizePaid",
-    onLogs: logs => {
-      logs.forEach(log => {
-        const { player, amount, matches, round } = log.args as {
-          player: string;
-          amount: bigint;
-          matches: number;
-          round: bigint;
-        };
-        setEvents(prev => [{ player, amount, matches, round, txHash: log.transactionHash ?? "" }, ...prev]);
-      });
-    },
+    fromBlock: 0n,
+    watch: true,
+  });
+
+  const events: PrizeEvent[] = (prizeEvents ?? []).map(log => {
+    const { player, amount, matches, round } = log.args as {
+      player: string;
+      amount: bigint;
+      matches: number;
+      round: bigint;
+    };
+
+    return {
+      player,
+      amount,
+      matches,
+      round,
+      txHash: log.transactionHash ?? "",
+    };
+  });
+
+  // Загружаем историю всех проведённых розыгрышей.
+  const { data: drawEventsRaw } = useScaffoldEventHistory({
+    contractName: "Lotto",
+    eventName: "NumbersDrawn",
+    fromBlock: 0n,
+    watch: true,
+  });
+
+  const drawEvents: DrawEvent[] = (drawEventsRaw ?? []).map(log => {
+    const { numbers, round, totalTickets } = log.args as {
+      numbers: readonly number[];
+      round: bigint;
+      totalTickets: bigint;
+    };
+
+    return {
+      numbers,
+      round,
+      totalTickets,
+      blockNumber: BigInt(log.blockNumber ?? 0),
+      txHash: log.transactionHash ?? "",
+    };
   });
 
   const drawn = (lastDraw as readonly number[] | undefined) ?? [];
@@ -420,7 +474,7 @@ const Home: NextPage = () => {
           </div>
         </motion.div>
 
-        {/* История */}
+        {/* История выигрышей */}
         <motion.div
           className="rounded-3xl p-6 bg-black/30 backdrop-blur-md border-2 border-amber-500/30 mb-8"
           initial={{ opacity: 0, y: 20 }}
@@ -451,6 +505,56 @@ const Home: NextPage = () => {
                     </p>
                   </div>
                   <p className="font-black shimmer-text text-xl">+{(Number(ev.amount) / 1e18).toFixed(2)} ETH</p>
+                </motion.li>
+              ))}
+            </ul>
+          )}
+        </motion.div>
+
+        {/* История розыгрышей */}
+        <motion.div
+          className="rounded-3xl p-6 bg-black/30 backdrop-blur-md border-2 border-cyan-500/30 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.65 }}
+        >
+          <h3 className="text-2xl font-black text-white mb-4 flex items-center gap-3">
+            <RoundIcon className="w-6 h-6 text-cyan-400" />
+            История розыгрышей
+            <span className="ml-auto px-3 py-1 rounded-full bg-cyan-500 text-white text-sm">{drawEvents.length}</span>
+          </h3>
+
+          {drawEvents.length === 0 ? (
+            <p className="text-white/60 text-center py-6">Пока не было проведено ни одного розыгрыша.</p>
+          ) : (
+            <ul className="space-y-3">
+              {drawEvents.map((ev, i) => (
+                <motion.li
+                  key={`${ev.txHash}-${i}`}
+                  className="rounded-xl p-4 bg-gradient-to-r from-cyan-400/10 to-blue-500/10 border border-cyan-400/30"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                >
+                  <div className="flex justify-between items-center flex-wrap gap-2 mb-3">
+                    <p className="text-white font-black text-lg">Раунд #{ev.round.toString()}</p>
+                    <p className="text-xs text-cyan-200/70">
+                      {ev.totalTickets.toString()} билетов · блок #{ev.blockNumber.toString()}
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 flex-wrap">
+                    {ev.numbers.map((n, j) => (
+                      <span
+                        key={j}
+                        className="w-11 h-11 rounded-full bg-gradient-to-br from-yellow-300 to-orange-500 flex items-center justify-center text-red-900 text-lg font-black shadow border-2 border-yellow-200"
+                      >
+                        {Number(n)}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-white/40 font-mono mt-3">TX: {shortAddr(ev.txHash)}</p>
                 </motion.li>
               ))}
             </ul>
